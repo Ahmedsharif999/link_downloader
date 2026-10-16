@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:gal/gal.dart';
 import 'package:open_filex/open_filex.dart';
 import 'package:path_provider/path_provider.dart';
 
@@ -101,11 +102,21 @@ class _HomePageState extends State<HomePage> {
     });
 
     try {
-      final dir = (Platform.isAndroid
-              ? await getExternalStorageDirectory()
-              : null) ??
-          await getApplicationDocumentsDirectory();
       final name = await _fileName(url);
+      final ext = name.toLowerCase().split('.').last;
+      final isVideo = ['mp4', 'webm', 'mov', 'mkv', '3gp'].contains(ext);
+      final isImage = ['jpg', 'jpeg', 'png', 'gif', 'webp'].contains(ext);
+      final toGallery = isVideo || isImage;
+
+      Directory dir;
+      if (toGallery) {
+        dir = await getTemporaryDirectory();
+      } else {
+        dir = (Platform.isAndroid
+                ? await getExternalStorageDirectory()
+                : null) ??
+            await getApplicationDocumentsDirectory();
+      }
       final path = '${dir.path}/$name';
 
       await _dio.download(
@@ -117,11 +128,20 @@ class _HomePageState extends State<HomePage> {
         },
       );
 
+      if (toGallery) {
+        if (!await Gal.hasAccess()) await Gal.requestAccess();
+        if (isVideo) {
+          await Gal.putVideo(path);
+        } else {
+          await Gal.putImage(path);
+        }
+      }
+
       setState(() {
         _items.insert(0, DownloadItem(name, path));
         _controller.clear();
       });
-      _toast('تم التحميل ✅');
+      _toast(toGallery ? 'تم الحفظ في المعرض ✅' : 'تم التحميل ✅');
     } catch (e) {
       _toast('التحميل فشل، اتأكد إن اللينك مباشر وشغال');
     } finally {
@@ -135,7 +155,7 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('محمّل اللينكات')),
+      appBar: AppBar(title: const Text('abo zahra')),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
