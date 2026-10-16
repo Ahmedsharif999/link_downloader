@@ -12,6 +12,7 @@ dependencies:
   dio: ^5.4.0
   path_provider: ^2.1.2
   open_filex: ^4.4.0
+  gal: ^2.3.0
 
 flutter:
   uses-material-design: true
