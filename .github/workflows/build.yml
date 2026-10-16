@@ -15,11 +15,12 @@ jobs:
         with:
           channel: stable
       - run: flutter create . --project-name link_downloader --platforms android
-      - run: sed -i 's|<application|<uses-permission android:name="android.permission.INTERNET"/>\n    <application|' android/app/src/main/AndroidManifest.xml
+      - run: sed -i 's|<application|<uses-permission android:name="android.permission.INTERNET"/>\n    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" android:maxSdkVersion="29"/>\n    <application|' android/app/src/main/AndroidManifest.xml
+      - run: sed -i 's|android:label="link_downloader"|android:label="abo zahra"|' android/app/src/main/AndroidManifest.xml
       - run: flutter pub get
       - run: flutter build apk --release
       - uses: softprops/action-gh-release@v2
         with:
           tag_name: v1
-          name: Link Downloader
+          name: abo zahra
           files: build/app/outputs/flutter-apk/app-release.apk
